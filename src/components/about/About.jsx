@@ -1,6 +1,6 @@
 import React from "react";
 import "./About.css";
-import Image from "../../assets/avatar-2.svg";
+import Image from "../../assets/Brij_logo.png";
 import Resume from "../../assets/resume.pdf";
 import AboutBox from "./AboutBox";
 
