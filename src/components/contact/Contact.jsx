@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import emailjs from "@emailjs/browser";
 
 import "./Contact.css";
 import "react-toastify/dist/ReactToastify.css";
+import { 
+    trackSectionView, 
+    trackFormSubmit, 
+    trackFormField, 
+    trackContactAttempt 
+} from "../../utils/tracking";
 
 const Contact = (props) => {
     const [name, setName] = useState("");
@@ -12,9 +18,75 @@ const Contact = (props) => {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Track when Contact section comes into view
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        trackSectionView('Contact');
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        const section = document.getElementById('contact');
+        if (section) {
+            observer.observe(section);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    // Track form field interactions
+    const handleFieldFocus = (fieldName) => {
+        trackFormField(fieldName, 'focus');
+    };
+
+    const handleFieldBlur = (fieldName) => {
+        trackFormField(fieldName, 'blur');
+    };
+
+    // Handle form field changes with tracking
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+        if (e.target.value.length === 1) { // Track when user starts typing
+            trackFormField('Name', 'start_typing');
+        }
+    };
+
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
+        if (e.target.value.length === 1) {
+            trackFormField('Email', 'start_typing');
+        }
+    };
+
+    const handleSubjectChange = (e) => {
+        setSubject(e.target.value);
+        if (e.target.value.length === 1) {
+            trackFormField('Subject', 'start_typing');
+        }
+    };
+
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value);
+        if (e.target.value.length === 1) {
+            trackFormField('Message', 'start_typing');
+        }
+    };
+
     const submitHandler = async (e) => {
         e.preventDefault();
+        
+        // Track form submission attempt
+        trackContactAttempt('Contact Form');
+        trackFormSubmit('Contact Form');
+        
         if (!name || !email || !subject || !message) {
+            // Track form validation error
+            trackFormField('Contact Form', 'validation_error');
             return toast.error("Please complete the form above");
         }
 
@@ -38,11 +110,23 @@ const Contact = (props) => {
                 (result) => {
                     setLoading(false);
                     toast.success(`Successfully sent email.`);
+                    
+                    // Track successful form submission
+                    trackFormField('Contact Form', 'submit_success');
+                    
+                    // Reset form
+                    setName("");
+                    setEmail("");
+                    setSubject("");
+                    setMessage("");
                 },
                 (error) => {
                     setLoading(false);
                     console.log(error);
                     toast.error(error.text);
+                    
+                    // Track form submission error
+                    trackFormField('Contact Form', 'submit_error');
                 }
             );
     };
@@ -66,7 +150,10 @@ const Contact = (props) => {
                                 type="text"
                                 className="contact__form-input"
                                 placeholder="Insert your name"
-                                onChange={(e) => setName(e.target.value)}
+                                value={name}
+                                onChange={handleNameChange}
+                                onFocus={() => handleFieldFocus('Name')}
+                                onBlur={() => handleFieldBlur('Name')}
                             />
                         </div>
 
@@ -75,7 +162,10 @@ const Contact = (props) => {
                                 type="email"
                                 className="contact__form-input"
                                 placeholder="Insert your email"
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                onChange={handleEmailChange}
+                                onFocus={() => handleFieldFocus('Email')}
+                                onBlur={() => handleFieldBlur('Email')}
                             />
                         </div>
                     </div>
@@ -85,23 +175,29 @@ const Contact = (props) => {
                             type="text"
                             className="contact__form-input"
                             placeholder="Insert your subject"
-                            onChange={(e) => setSubject(e.target.value)}
+                            value={subject}
+                            onChange={handleSubjectChange}
+                            onFocus={() => handleFieldFocus('Subject')}
+                            onBlur={() => handleFieldBlur('Subject')}
                         />
                     </div>
 
                     <div className="contact__form-div contact__form-area">
                         <textarea
-                            name=""
-                            id=""
+                            name="message"
+                            id="message"
                             cols="30"
                             rows="10"
                             className="contact__form-input"
                             placeholder="Write your message"
-                            onChange={(e) => setMessage(e.target.value)}
+                            value={message}
+                            onChange={handleMessageChange}
+                            onFocus={() => handleFieldFocus('Message')}
+                            onBlur={() => handleFieldBlur('Message')}
                         ></textarea>
                     </div>
 
-                    <button type="submit" className="btn">
+                    <button type="submit" className="btn" disabled={loading}>
                         {loading ? "Sending..." : "Send Message"}
                     </button>
                 </form>

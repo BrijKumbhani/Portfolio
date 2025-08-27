@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Services.css';
 import Image1 from '../../assets/Data_analysis.png'
 import Image2 from '../../assets/Data-Visualization.png'
 import Image3 from '../../assets/Business-Analytics.png'
+import { trackSectionView, trackServiceInquiry } from '../../utils/tracking';
 
 const data = [
     {
@@ -29,6 +30,32 @@ const data = [
 ];
 
 const Services = () => {
+    // Track when Services section comes into view
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        trackSectionView('Services');
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        const section = document.getElementById('services');
+        if (section) {
+            observer.observe(section);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    // Handle service card click/interaction
+    const handleServiceClick = (serviceName) => {
+        trackServiceInquiry(serviceName);
+    };
+
     return (
         <section className="services container section" id="services">
             <h2 className="section__title">Services</h2>
@@ -36,8 +63,13 @@ const Services = () => {
             <div className="services__container grid">
                 {data.map(({ id, image, title, description }) => {
                     return (
-                        <div className="services__card" key={id}>
-                            <img src={image} alt='' className='services__img' width="80" />
+                        <div 
+                            className="services__card" 
+                            key={id}
+                            onClick={() => handleServiceClick(title)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <img src={image} alt={`${title} service`} className='services__img' width="80" />
 
                             <h3 className="services__title">{title}</h3>
                             <p className="services__description">{description}</p>

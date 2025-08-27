@@ -1,12 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Resume.css";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import Button from "./Button";
-
 import WorkExperience from "./WorkExperience";
+import { trackSectionView, trackButtonClick, trackSkillView } from "../../utils/tracking";
 
 const Resume = () => {
     const [tabIndex, setTabIndex] = useState(0);
+
+    // Track when Resume section comes into view
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        trackSectionView('Resume');
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        const section = document.getElementById('resume');
+        if (section) {
+            observer.observe(section);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    // Handle tab selection with tracking
+    const handleTabChange = (index) => {
+        setTabIndex(index);
+        const selectedCompany = WorkExperience[index]?.company;
+        if (selectedCompany) {
+            trackButtonClick(`Experience Tab - ${selectedCompany}`, 'Resume Section');
+            trackSkillView(`Work Experience - ${selectedCompany}`);
+        }
+    };
 
     return (
         <section className="resume container section" id="resume">
@@ -16,7 +47,7 @@ const Resume = () => {
                 <Tabs
                     className="tabs"
                     selectedIndex={tabIndex}
-                    onSelect={(index) => setTabIndex(index)}
+                    onSelect={handleTabChange}
                     selectedTabClassName={"is-active"}
                     selectedTabPanelClassName={"is-active"}
                 >
