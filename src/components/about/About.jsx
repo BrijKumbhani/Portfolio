@@ -19,7 +19,7 @@ const About = () => {
         <div className="about__data grid">
           <div className="about__info">
             <p className="about__description">
-              🔍 Curious about the stories data can tell? I’m Brij Kumbhani, a Computer Engineering student with a passion for turning raw numbers into real insights.
+              🔍 Curious about the stories data can tell? I’m Brij Kumbhani, a Computer Engineering student with a passion for turning raw numbers into real insights. 
               <br />
               Skilled in SQL, Python, Power BI, and Excel, I’ve worked on projects ranging from retail dashboards to election data analysis. With certifications in data tools and a solid academic record, I combine technical expertise with discipline and leadership, shaped by my NCC background.
               <br />
